@@ -87,9 +87,9 @@ def main():
     parser.add_argument('--arch', default='lenet', type=str,
                         choices=['wideresnet', 'resnext', 'lenet'],
                         help='dataset name')
-    parser.add_argument('--total-steps', default=2 ** 16, type=int,
+    parser.add_argument('--total-steps', default=2 ** 15, type=int,
                         help='number of total steps to run')
-    parser.add_argument('--eval-step', default=512, type=int,
+    parser.add_argument('--eval-step', default=256, type=int,
                         help='number of eval steps to run')
     parser.add_argument('--start-epoch', default=0, type=int,
                         help='manual epoch number (useful on restarts)')
@@ -226,7 +226,7 @@ def main():
         torch.distributed.barrier()
 
     labeled_dataset, unlabeled_dataset, test_dataset = DATASET_GETTERS[args.dataset](
-        args, './data')
+        args, '~/Datasets')
 
     if args.local_rank == 0:
         torch.distributed.barrier()
@@ -479,14 +479,14 @@ def train(args, labeled_trainloader, unlabeled_trainloader, test_loader,
                 np.mean(test_accs[-20:])))
 
     x_axis = list(range(len(test_accs)))
-    png_title = './myresult/png/'+'my_noise_ratio_' + str(args.noise_ratio)
+    png_title = 'noise_' + str(args.noise_ratio)+'_labeled_' + str(args.num_labeled) + '_threshold_' + str(args._confidence_threshold)
     plt.title(png_title)
     plt.plot(x_axis, test_accs)
     plt.annotate(test_accs[-1], xy=(x_axis[-1], test_accs[-1]))
     plt.savefig(png_title + '.png')
 
     import pandas as pd
-    csv_name = './myresult/csv/result.csv'
+    csv_name = 'result.csv'
     try:
         df = pd.read_csv(csv_name, index_col=0)
         df[png_title] = test_accs
