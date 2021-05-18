@@ -113,7 +113,7 @@ def main():
                         help='coefficient of unlabeled loss')
     parser.add_argument('--T', default=1, type=float,
                         help='pseudo label temperature')
-    parser.add_argument('--confidence-threshold', default=0.95, type=float,
+    parser.add_argument('--confidence-threshold', default=1.1, type=float,
                         help='confidence threshold')
     parser.add_argument('--threshold', default=0.95, type=float,
                         help='pseudo label threshold')
@@ -390,8 +390,8 @@ def train(args, labeled_trainloader, unlabeled_trainloader, test_loader,
             mask_1 = max_probs_1.ge(args.confidence_threshold).float()
             mask_2 = (targets_x_1 != targets_x)
             mask_3 = 1 - (mask_1 * mask_2)  # 把大于0.9的并且伪标记和标记不等的mask掉
-            if 0 in mask_3:
-                print(mask_3)
+            # if 0 in mask_3:
+            #     print(mask_3)
 
             Lx = (F.cross_entropy(logits_x, targets_x, reduction='none') * mask_3).mean()
 
@@ -479,7 +479,7 @@ def train(args, labeled_trainloader, unlabeled_trainloader, test_loader,
                 np.mean(test_accs[-20:])))
 
     x_axis = list(range(len(test_accs)))
-    png_title = 'noise_' + str(args.noise_ratio)+'_labeled_' + str(args.num_labeled) + '_threshold_' + str(args._confidence_threshold)
+    png_title = 'noise_' + str(args.noise_ratio)+'_labeled_' + str(args.num_labeled) + '_threshold_' + str(args.confidence_threshold)
     plt.title(png_title)
     plt.plot(x_axis, test_accs)
     plt.annotate(test_accs[-1], xy=(x_axis[-1], test_accs[-1]))
